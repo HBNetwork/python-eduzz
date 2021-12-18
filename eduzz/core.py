@@ -17,9 +17,7 @@ class Eduzz:
         params = {"start_date": start_date, "end_date": end_date}
         params["page"] = next_page
 
-        response = requests.get(
-            URL.add_path("/sale/get_sale_list"), params=params, auth=self.credentials
-        )
+        response = requests.get(URL.add_path("/sale/get_sale_list"), params=params, auth=self.credentials)
         response.raise_for_status()
         json = response.json(cls=JSONDecoder)
 

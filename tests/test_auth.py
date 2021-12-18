@@ -31,12 +31,7 @@ def test_auth_expiration_logic(auth):
 
 @responses.activate
 def test_auth_renew_when_token_empty(auth, req):
-    responses.add(
-        responses.POST,
-        regex(".+/generate_token"),
-        json=token_body(token="VALID"),
-        status=201,
-    )
+    responses.add(responses.POST, regex(".+/generate_token"), json=token_body(token="VALID"), status=201)
 
     req.prepare("GET", "https://h/first", auth=auth)
 
@@ -48,12 +43,7 @@ def test_auth_renew_when_token_empty(auth, req):
 def test_auth_renew_when_token_expired(auth, req):
     auth.token = ("EXPIRED", BEFORE_NOW)
 
-    responses.add(
-        responses.POST,
-        regex(".+/generate_token"),
-        json=token_body("VALID", NOW_PLUS_15),
-        status=201,
-    )
+    responses.add(responses.POST, regex(".+/generate_token"), json=token_body("VALID", NOW_PLUS_15), status=201)
 
     req.prepare("GET", "https://h/first", auth=auth)
 
@@ -62,9 +52,7 @@ def test_auth_renew_when_token_expired(auth, req):
 
 @responses.activate
 def test_auth_raises_for_empty_credentials(auth, req):
-    responses.add(
-        responses.POST, regex(".+/generate_token"), json=error_body("#0001"), status=401
-    )
+    responses.add(responses.POST, regex(".+/generate_token"), json=error_body("#0001"), status=401)
 
     with pytest.raises(EduzzAPIError, match="#0001 Empty credentials"):
         req.prepare("GET", "https://h/first", auth=auth)
@@ -72,9 +60,7 @@ def test_auth_raises_for_empty_credentials(auth, req):
 
 @responses.activate
 def test_auth_raises_for_invalid_credentials(auth, req):
-    responses.add(
-        responses.POST, regex(".+/generate_token"), json=error_body("#0002"), status=401
-    )
+    responses.add(responses.POST, regex(".+/generate_token"), json=error_body("#0002"), status=401)
 
     with pytest.raises(EduzzAPIError, match="#0002 Invalid credentials"):
         req.prepare("GET", "https://h/first", auth=auth)
@@ -82,9 +68,7 @@ def test_auth_raises_for_invalid_credentials(auth, req):
 
 @responses.activate
 def test_auth_raise_for_forbidden_access(auth, req):
-    responses.add(
-        responses.POST, regex(".+/generate_token"), json=error_body("#0010"), status=401
-    )
+    responses.add(responses.POST, regex(".+/generate_token"), json=error_body("#0010"), status=401)
 
     with pytest.raises(EduzzAPIError, match="#0010 Forbiden access"):
         req.prepare("GET", "https://h/first", auth=auth)
@@ -96,15 +80,11 @@ def test_auth_recover_from_undetected_expired_token(auth):
     responses.add_callback(
         responses.POST,
         regex(".+/generate_token"),
-        ResponsesSequence(
-            (201, "", token_body("T1", NOW)), (201, "", token_body("T2", NOW_PLUS_15))
-        ),
+        ResponsesSequence((201, "", token_body("T1", NOW)), (201, "", token_body("T2", NOW_PLUS_15))),
     )
 
     responses.add_callback(
-        responses.GET,
-        "https://h/first",
-        ResponsesSequence((401, "", error_body("#0029")), (200, "", "Ok")),
+        responses.GET, "https://h/first", ResponsesSequence((401, "", error_body("#0029")), (200, "", "Ok"))
     )
 
     r = requests.get("https://h/first", auth=auth)
@@ -132,16 +112,8 @@ ERRORS = {
 
 
 def error_body(code):
-    return {
-        "success": False,
-        "code": code,
-        "details": ERRORS[code],
-        "link": "https://api2.eduzz.com",
-    }
+    return {"success": False, "code": code, "details": ERRORS[code], "link": "https://api2.eduzz.com"}
 
 
 def token_body(token="VALID", token_valid_until=NOW_PLUS_15):
-    return {
-        "success": True,
-        "data": {"token": token, "token_valid_until": token_valid_until},
-    }
+    return {"success": True, "data": {"token": token, "token_valid_until": token_valid_until}}
