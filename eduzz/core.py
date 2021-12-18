@@ -1,25 +1,26 @@
-import requests
-from eduzz.serializers import JSONDecoder
-from urlobject import URLObject
-
-URL = URLObject("https://api2.eduzz.com/")
+from eduzz.auth import EduzzToken
+from eduzz.sessions import EduzzSession
 
 
 class Eduzz:
-    def __init__(self, credentials):
-        self.credentials = credentials
+    def __init__(self, session):
+        self.session = session
+
+    @classmethod
+    def from_credentials(cls, **credentials):
+        auth = EduzzToken(**credentials)
+        session = EduzzSession()
+        session.auth = auth
+
+        return cls(session)
 
     def get_sales_list(self, start_date, end_date):
         next_page = 1
-        token = None
-        token_valid_until = None
+        params = {"start_date": start_date, "end_date": end_date, "page": next_page}
 
-        params = {"start_date": start_date, "end_date": end_date}
-        params["page"] = next_page
-
-        response = requests.get(URL.add_path("/sale/get_sale_list"), params=params, auth=self.credentials)
+        response = self.session.get("/sale/get_sale_list", params=params)
         response.raise_for_status()
-        json = response.json(cls=JSONDecoder)
+        json = response.json()
 
         data = json["data"]
         paginator = json["paginator"]  # noqa
