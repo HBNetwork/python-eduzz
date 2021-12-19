@@ -1,4 +1,4 @@
-from .core import *
+from .core import Eduzz
 from .serializers import patchjson
 
 patchjson()
