@@ -4,10 +4,11 @@ from re import compile as regex
 import pytest
 import requests
 import responses
+from freezegun import freeze_time
+
 from eduzz.auth import EduzzToken
 from eduzz.sessions import EduzzAPIError
 from eduzz.tests import ResponsesSequence
-from freezegun import freeze_time
 
 NOW = datetime(2021, 12, 4, 0, 0, 0)
 BEFORE_NOW = datetime(2021, 12, 3, 23, 59, 59)
@@ -84,13 +85,28 @@ def test_auth_recover_from_undetected_expired_token(auth):
     )
 
     responses.add_callback(
-        responses.GET, "https://h/first", ResponsesSequence((401, "", error_body("#0029")), (200, "", "Ok"))
+        responses.GET, "https://h/first", ResponsesSequence((401, "", error_body("#0029")), (200, "", data_body()))
     )
 
     r = requests.get("https://h/first", auth=auth)
 
     assert len(responses.calls) == 4
     assert r.status_code == 200
+
+
+@responses.activate
+@freeze_time(NOW)
+def test_auth_updates_with_refreshed_token(auth):
+    responses.add(responses.POST, regex(".+/generate_token"), status=201, json=token_body("VALID", NOW))
+
+    responses.add(
+        responses.GET, regex(".+/first"), status=200, json=data_body(token="T2", token_valid_until=NOW_PLUS_15)
+    )
+
+    requests.get("https://h/first", auth=auth)
+
+    assert len(responses.calls) == 2
+    assert auth.token == "T2", NOW_PLUS_15
 
 
 @pytest.fixture
@@ -117,3 +133,7 @@ def error_body(code):
 
 def token_body(token="VALID", token_valid_until=NOW_PLUS_15):
     return {"success": True, "data": {"token": token, "token_valid_until": token_valid_until}}
+
+
+def data_body(token="VALID", token_valid_until=NOW_PLUS_15):
+    return {"success": True, "data": [{"id": 1}], "profile": {"token": token, "token_valid_until": token_valid_until}}

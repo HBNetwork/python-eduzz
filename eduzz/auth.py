@@ -45,9 +45,8 @@ class EduzzToken(AuthBase):
         r.raise_for_status()
 
         json = r.json()
-
-        self._token = json["data"]["token"]
-        self._token_valid_until = json["data"]["token_valid_until"]
+        data = json["data"]
+        self.token = data["token"], data["token_valid_until"]
 
     def handle_401(self, r, **kwargs):
         if r.status_code != 401:
@@ -74,7 +73,26 @@ class EduzzToken(AuthBase):
 
         return _r
 
+    def store_refreshed_token(self, r, **kwargs):
+        if 400 <= r.status_code < 600:
+            return r
+
+        if r.request.url.endswith(self.AUTH_PATH):
+            return r
+
+        json = r.json()
+
+        if json["success"] is not True:
+            return r
+
+        profile = json["profile"]
+        self.token = profile["token"], profile["token_valid_until"]
+
+        return r
+
     def __call__(self, r):
         r.headers["Token"] = self.token
         r.register_hook("response", self.handle_401)
+        r.register_hook("response", self.store_refreshed_token)
+
         return r
