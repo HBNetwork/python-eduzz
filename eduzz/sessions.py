@@ -1,7 +1,10 @@
 from urllib.parse import urljoin
 
 import requests
-from requests.adapters import HTTPAdapter
+
+from eduzz.adapters import EduzzAdapter
+from eduzz.adapters import EduzzAPIError  # noqa
+from eduzz.auth import EduzzAuth
 
 
 class BaseUrlSession(requests.Session):
@@ -17,56 +20,22 @@ class BaseUrlSession(requests.Session):
         return super(BaseUrlSession, self).prepare_request(request)
 
 
-class EduzzAPIError(requests.HTTPError):
-    """An API level error has ocurred."""
+class EduzzBaseSession(BaseUrlSession):
+    """Knows how navigate on Eduzz API V2. Used by EduzzAuth token generation."""
 
-
-class EduzzResponse(requests.Response):
-    ERROR_STATUSES = {400, 401, 403, 404, 405, 409, 422, 500}
-
-    def __init__(self):
-        self._json = None
-        super(EduzzResponse, self).__init__()
-
-    def __repr__(self):
-        return "<Response [%s] %s>" % (self.status_code, self.url)
-
-    @classmethod
-    def from_response(cls, r):
-        """Smelly magic to circunvent requests coupling to it's own Response class."""
-        r.__class__ = cls
-        r._json = None  # Necessary because we can't run __init__ again.
-        return r
-
-    def raise_for_status(self):
-        if self.status_code in self.ERROR_STATUSES:
-            json = self.json()
-            code, details = json["code"], json["details"]
-
-            raise EduzzAPIError(f"{code} {details}", response=self)
-
-        super(EduzzResponse, self).raise_for_status()
-
-    def json(self, **kwargs):
-        if self._json is None:
-            self._json = super(EduzzResponse, self).json(**kwargs)
-
-        return self._json
-
-
-class EduzzAdapter(HTTPAdapter):
-    def __init__(self, response_factory=EduzzResponse.from_response, **kwargs):
-        self.response_factory = response_factory
-        super(EduzzAdapter, self).__init__(**kwargs)
-
-    def send(self, *args, **kwargs):
-        r = super(EduzzAdapter, self).send(*args, **kwargs)
-        return self.response_factory(r)
-
-
-class EduzzSession(BaseUrlSession):
     ENDPOINT = "https://api2.eduzz.com/"
 
-    def __init__(self):
-        super(EduzzSession, self).__init__(base_url=self.ENDPOINT)
-        self.mount(self.ENDPOINT, EduzzAdapter())
+    def __init__(self, **httpadapter_kwargs):
+        """httpadapter_kwargs can be: pool_connections, pool_maxsize, max_retries, pool_block."""
+        super(EduzzBaseSession, self).__init__(base_url=self.ENDPOINT)
+        self.mount(self.ENDPOINT, EduzzAdapter(**httpadapter_kwargs))
+
+
+class EduzzSession(EduzzBaseSession):
+    """Full featured session to work with high level clients."""
+
+    @classmethod
+    def from_credentials(cls, email, publickey, apikey, **httpadapter_kwargs):
+        self = cls(**httpadapter_kwargs)
+        self.auth = EduzzAuth(email, publickey, apikey, EduzzBaseSession)
+        return self
