@@ -20,6 +20,8 @@ class EduzzAPIError(requests.HTTPError):
 
 
 class ResponseAdapter:
+    ERROR_STATUSES = {400, 401, 403, 404, 405, 409, 422, 500}
+
     def __init__(self, r):
         self._response = r
         self._json = None
@@ -28,8 +30,7 @@ class ResponseAdapter:
         return getattr(self._response, item)
 
     def raise_for_status(self):
-        documented_statuses = (400, 401, 403, 404, 405, 409, 422, 500)
-        if self.status_code in documented_statuses:
+        if self.status_code in self.ERROR_STATUSES:
             json = self.json()
             code, details = json["code"], json["details"]
 
