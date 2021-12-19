@@ -1,10 +1,12 @@
 from urllib.parse import urljoin
 
 import requests
+from requests.adapters import HTTPAdapter
 
 
-# Taken from https://github.com/requests/toolbelt/
 class BaseUrlSession(requests.Session):
+    """Taken from https://github.com/requests/toolbelt/"""
+
     def __init__(self, base_url):
         self.base_url = base_url
         super(BaseUrlSession, self).__init__()
@@ -19,18 +21,22 @@ class EduzzAPIError(requests.HTTPError):
     """An API level error has ocurred."""
 
 
-class ResponseAdapter:
+class EduzzResponse(requests.Response):
     ERROR_STATUSES = {400, 401, 403, 404, 405, 409, 422, 500}
 
-    def __init__(self, r):
-        self._response = r
+    def __init__(self):
         self._json = None
-
-    def __getattr__(self, item):
-        return getattr(self._response, item)
+        super(EduzzResponse, self).__init__()
 
     def __repr__(self):
-        return "<Response [%s] [%s]>" % (self._response.status_code, self._response.request.url)
+        return "<Response [%s] %s>" % (self.status_code, self.url)
+
+    @classmethod
+    def from_response(cls, r):
+        """Smelly magic to circunvent requests coupling to it's own Response class."""
+        r.__class__ = cls
+        r._json = None  # Necessary because we can't run __init__ again.
+        return r
 
     def raise_for_status(self):
         if self.status_code in self.ERROR_STATUSES:
@@ -39,13 +45,23 @@ class ResponseAdapter:
 
             raise EduzzAPIError(f"{code} {details}", response=self)
 
-        self._response.raise_for_status()
+        super(EduzzResponse, self).raise_for_status()
 
     def json(self, **kwargs):
         if self._json is None:
-            self._json = self._response.json(**kwargs)
+            self._json = super(EduzzResponse, self).json(**kwargs)
 
         return self._json
+
+
+class EduzzAdapter(HTTPAdapter):
+    def __init__(self, response_factory=EduzzResponse.from_response, **kwargs):
+        self.response_factory = response_factory
+        super(EduzzAdapter, self).__init__(**kwargs)
+
+    def send(self, *args, **kwargs):
+        r = super(EduzzAdapter, self).send(*args, **kwargs)
+        return self.response_factory(r)
 
 
 class EduzzSession(BaseUrlSession):
@@ -53,7 +69,4 @@ class EduzzSession(BaseUrlSession):
 
     def __init__(self):
         super(EduzzSession, self).__init__(base_url=self.ENDPOINT)
-
-    def request(self, method, url, *args, **kwargs):
-        r = super(EduzzSession, self).request(method, url, *args, **kwargs)
-        return ResponseAdapter(r)
+        self.mount(self.ENDPOINT, EduzzAdapter())
