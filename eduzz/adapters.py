@@ -10,6 +10,11 @@ class EduzzAPIError(HTTPError):
 
 
 class EduzzResponse(Response):
+    """
+    This class is a proper Response subclass that contemplates the API's design decisions.
+    This could be an adapter, but we would hit __getattr__ everytime.
+    """
+
     ERROR_STATUSES = {400, 401, 403, 404, 405, 409, 422, 500}
 
     def __init__(self):
