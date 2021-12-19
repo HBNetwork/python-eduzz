@@ -22,6 +22,7 @@ class EduzzAPIError(requests.HTTPError):
 class ResponseAdapter:
     def __init__(self, r):
         self._response = r
+        self._json = None
 
     def __getattr__(self, item):
         return getattr(self._response, item)
@@ -35,6 +36,12 @@ class ResponseAdapter:
             raise EduzzAPIError(f"{code} {details}", response=self)
 
         self._response.raise_for_status()
+
+    def json(self, **kwargs):
+        if self._json is None:
+            self._json = self._response.json(**kwargs)
+
+        return self._json
 
 
 class EduzzSession(BaseUrlSession):
