@@ -29,6 +29,9 @@ class ResponseAdapter:
     def __getattr__(self, item):
         return getattr(self._response, item)
 
+    def __repr__(self):
+        return "<Response [%s] [%s]>" % (self._response.status_code, self._response.request.url)
+
     def raise_for_status(self):
         if self.status_code in self.ERROR_STATUSES:
             json = self.json()

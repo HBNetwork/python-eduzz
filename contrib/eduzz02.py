@@ -8,7 +8,7 @@ client = Eduzz.from_credentials(
     email=config("EDUZZ_EMAIL"), publickey=config("EDUZZ_PUBLICKEY"), apikey=config("EDUZZ_APIKEY")
 )
 
-g = client.get_sales_list("2021-11-01", "2021-11-10")
+g = client.get_sales_list2("2021-11-01", "2021-11-30")
 
 data = list(g)
 
