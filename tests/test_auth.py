@@ -6,8 +6,8 @@ import requests
 import responses
 from freezegun import freeze_time
 
-from eduzz.auth import EduzzToken
-from eduzz.sessions import EduzzAPIError
+from eduzz.auth import EduzzAuth
+from eduzz.sessions import EduzzAPIError, EduzzSession
 from eduzz.tests import ResponsesSequence
 
 NOW = datetime(2021, 12, 4, 0, 0, 0)
@@ -111,7 +111,7 @@ def test_auth_updates_with_refreshed_token(auth):
 
 @pytest.fixture
 def auth():
-    return EduzzToken("e@mail.com", "PUBLICKEY", "APIKEY")
+    return EduzzAuth("e@mail.com", "PUBLICKEY", "APIKEY", EduzzSession)
 
 
 @pytest.fixture

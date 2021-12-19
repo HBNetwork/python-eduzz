@@ -1,6 +1,6 @@
 from requests_futures.sessions import FuturesSession
 
-from eduzz.auth import EduzzToken
+from eduzz.auth import EduzzAuth
 from eduzz.sessions import EduzzSession
 
 
@@ -10,7 +10,7 @@ class Eduzz:
 
     @classmethod
     def from_credentials(cls, **credentials):
-        auth = EduzzToken(**credentials)
+        auth = EduzzAuth(**credentials)
         session = EduzzSession()
         session.auth = auth
 

@@ -2,14 +2,12 @@ from datetime import datetime
 
 from requests.auth import AuthBase
 
-from .sessions import EduzzSession
 
-
-class EduzzToken(AuthBase):
+class EduzzAuth(AuthBase):
     AUTH_PATH = "/credential/generate_token"
     TOKEN_EXPIRED_ERROR_CODE = "#0029"
 
-    def __init__(self, email, publickey, apikey, session_class=EduzzSession):
+    def __init__(self, email, publickey, apikey, session_class):
         self.credentials = dict(email=email, publickey=publickey, apikey=apikey)
         self.session_class = session_class
 
