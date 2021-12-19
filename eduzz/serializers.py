@@ -33,7 +33,8 @@ class EduzzJSONEncoder(json.JSONEncoder):
     JSONEncoder subclass that knows how to encode date/time, decimal types, and
     UUIDs.
 
-    * Extracted from https://github.com/django/django/django/core/serializers/json.py
+    * Extracted from:
+    https://github.com/django/django/django/core/serializers/json.py
     """
 
     def default(self, o):
@@ -81,6 +82,10 @@ def duration_iso_string(duration):
     else:
         sign = ""
 
-    days, hours, minutes, seconds, microseconds = _get_duration_components(duration)
+    days, hours, minutes, seconds, microseconds = _get_duration_components(
+        duration
+    )
     ms = ".{:06d}".format(microseconds) if microseconds else ""
-    return "{}P{}DT{:02d}H{:02d}M{:02d}{}S".format(sign, days, hours, minutes, seconds, ms)
+    return "{}P{}DT{:02d}H{:02d}M{:02d}{}S".format(
+        sign, days, hours, minutes, seconds, ms
+    )

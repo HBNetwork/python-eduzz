@@ -20,7 +20,11 @@ class Eduzz:
         next_page = 1
 
         while next_page:
-            params = {"start_date": start_date, "end_date": end_date, "page": next_page}
+            params = {
+                "start_date": start_date,
+                "end_date": end_date,
+                "page": next_page,
+            }
 
             response = self.session.get("/sale/get_sale_list", params=params)
             response.raise_for_status()
@@ -36,7 +40,11 @@ class Eduzz:
     def get_sales_list2(self, start_date, end_date):
         next_page = 1
 
-        params = {"start_date": start_date, "end_date": end_date, "page": next_page}
+        params = {
+            "start_date": start_date,
+            "end_date": end_date,
+            "page": next_page,
+        }
 
         response = self.session.get("/sale/get_sale_list", params=params)
         print(response)
@@ -49,9 +57,16 @@ class Eduzz:
         with FuturesSession(session=self.session) as session:
             futures = [
                 session.get(
-                    "/sale/get_sale_list", params={"start_date": start_date, "end_date": end_date, "page": page}
+                    "/sale/get_sale_list",
+                    params={
+                        "start_date": start_date,
+                        "end_date": end_date,
+                        "page": page,
+                    },
                 )
-                for page in range(paginator["page"] + 1, paginator["totalPages"] + 1)
+                for page in range(
+                    paginator["page"] + 1, paginator["totalPages"] + 1
+                )
             ]
 
         yield from json["data"]

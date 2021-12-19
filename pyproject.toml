@@ -6,7 +6,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.black]
-line-length = 120
+line-length = 80
 include = '\.pyi?$'
 exclude = '''
 /(
