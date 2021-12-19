@@ -3,11 +3,10 @@ from re import compile as regex
 
 import pytest
 import requests
-import responses
 from freezegun import freeze_time
+from responses import RequestsMock
 
-from eduzz.auth import EduzzAuth
-from eduzz.sessions import EduzzAPIError, EduzzSession
+from eduzz.sessions import EduzzAuth, EduzzAPIError, EduzzBaseSession
 from eduzz.tests import ResponsesSequence
 
 NOW = datetime(2021, 12, 4, 0, 0, 0)
@@ -30,8 +29,7 @@ def test_auth_expiration_logic(auth):
     assert auth.is_expired, "Token should be just expired."
 
 
-@responses.activate
-def test_auth_renew_when_token_empty(auth, req):
+def test_auth_renew_when_token_empty(auth, req, responses):
     responses.add(responses.POST, regex(".+/generate_token"), json=token_body(token="VALID"), status=201)
 
     req.prepare("GET", "https://h/first", auth=auth)
@@ -39,9 +37,8 @@ def test_auth_renew_when_token_empty(auth, req):
     assert req.headers["Token"] == "VALID"
 
 
-@responses.activate
 @freeze_time(NOW)
-def test_auth_renew_when_token_expired(auth, req):
+def test_auth_renew_when_token_expired(auth, req, responses):
     auth.token = ("EXPIRED", BEFORE_NOW)
 
     responses.add(responses.POST, regex(".+/generate_token"), json=token_body("VALID", NOW_PLUS_15), status=201)
@@ -51,33 +48,29 @@ def test_auth_renew_when_token_expired(auth, req):
     assert req.headers["Token"] == "VALID"
 
 
-@responses.activate
-def test_auth_raises_for_empty_credentials(auth, req):
+def test_auth_raises_for_empty_credentials(auth, req, responses):
     responses.add(responses.POST, regex(".+/generate_token"), json=error_body("#0001"), status=401)
 
     with pytest.raises(EduzzAPIError, match="#0001 Empty credentials"):
         req.prepare("GET", "https://h/first", auth=auth)
 
 
-@responses.activate
-def test_auth_raises_for_invalid_credentials(auth, req):
+def test_auth_raises_for_invalid_credentials(auth, req, responses):
     responses.add(responses.POST, regex(".+/generate_token"), json=error_body("#0002"), status=401)
 
     with pytest.raises(EduzzAPIError, match="#0002 Invalid credentials"):
         req.prepare("GET", "https://h/first", auth=auth)
 
 
-@responses.activate
-def test_auth_raise_for_forbidden_access(auth, req):
+def test_auth_raise_for_forbidden_access(auth, req, responses):
     responses.add(responses.POST, regex(".+/generate_token"), json=error_body("#0010"), status=401)
 
     with pytest.raises(EduzzAPIError, match="#0010 Forbiden access"):
         req.prepare("GET", "https://h/first", auth=auth)
 
 
-@responses.activate
 @freeze_time(NOW)
-def test_auth_recover_from_undetected_expired_token(auth):
+def test_auth_recover_from_undetected_expired_token(auth, responses):
     responses.add_callback(
         responses.POST,
         regex(".+/generate_token"),
@@ -94,9 +87,8 @@ def test_auth_recover_from_undetected_expired_token(auth):
     assert r.status_code == 200
 
 
-@responses.activate
 @freeze_time(NOW)
-def test_auth_updates_with_refreshed_token(auth):
+def test_auth_updates_with_refreshed_token(auth, responses):
     responses.add(responses.POST, regex(".+/generate_token"), status=201, json=token_body("VALID", NOW))
 
     responses.add(
@@ -111,12 +103,29 @@ def test_auth_updates_with_refreshed_token(auth):
 
 @pytest.fixture
 def auth():
-    return EduzzAuth("e@mail.com", "PUBLICKEY", "APIKEY", EduzzSession)
+    return EduzzAuth("e@mail.com", "PUBLICKEY", "APIKEY", EduzzBaseSession)
 
 
 @pytest.fixture
 def req():
     return requests.PreparedRequest()
+
+
+@pytest.fixture
+def responses(monkeypatch):
+    import responses as responses_module
+    from functools import partial
+    from eduzz.serializers import EduzzJSONEncoder, EduzzJSONDecoder
+
+    with monkeypatch.context() as m:
+        m.setattr(
+            responses_module.json_module, "loads", partial(responses_module.json_module.loads, cls=EduzzJSONDecoder)
+        )
+        m.setattr(
+            responses_module.json_module, "dumps", partial(responses_module.json_module.dumps, cls=EduzzJSONEncoder)
+        )
+        with RequestsMock() as rm:
+            yield rm
 
 
 ERRORS = {

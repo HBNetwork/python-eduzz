@@ -5,11 +5,11 @@ import uuid
 
 
 def patchjson():
-    json._default_encoder = JSONEncoder()
-    json._default_decoder = JSONDecoder()
+    json._default_encoder = EduzzJSONEncoder()
+    json._default_decoder = EduzzJSONDecoder()
 
 
-class JSONDecoder(json.JSONDecoder):
+class EduzzJSONDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
         super().__init__(object_hook=self.hook, *args, **kwargs)
 
@@ -28,7 +28,7 @@ class JSONDecoder(json.JSONDecoder):
         return d
 
 
-class JSONEncoder(json.JSONEncoder):
+class EduzzJSONEncoder(json.JSONEncoder):
     """
     JSONEncoder subclass that knows how to encode date/time, decimal types, and
     UUIDs.
