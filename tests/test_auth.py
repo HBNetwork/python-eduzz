@@ -6,7 +6,7 @@ import requests
 from freezegun import freeze_time
 from responses import RequestsMock
 
-from eduzz.sessions import EduzzAuth, EduzzAPIError, EduzzBaseSession
+from eduzz.sessions import EduzzAuth, EduzzAPIError, EduzzSession
 from eduzz.tests import ResponsesSequence
 
 NOW = datetime(2021, 12, 4, 0, 0, 0)
@@ -143,7 +143,7 @@ def test_auth_updates_with_refreshed_token(auth, responses):
 
 @pytest.fixture
 def auth():
-    return EduzzAuth("e@mail.com", "PUBLICKEY", "APIKEY", EduzzBaseSession)
+    return EduzzAuth("e@mail.com", "PUBLICKEY", "APIKEY", EduzzSession)
 
 
 @pytest.fixture
@@ -155,18 +155,18 @@ def req():
 def responses(monkeypatch):
     import responses as responses_module
     from functools import partial
-    from eduzz.serializers import EduzzJSONEncoder, EduzzJSONDecoder
+    from eduzz.serializers import BetterJSONEncoder, BetterJSONDecoder
 
     with monkeypatch.context() as m:
         m.setattr(
             responses_module.json_module,
             "loads",
-            partial(responses_module.json_module.loads, cls=EduzzJSONDecoder),
+            partial(responses_module.json_module.loads, cls=BetterJSONDecoder),
         )
         m.setattr(
             responses_module.json_module,
             "dumps",
-            partial(responses_module.json_module.dumps, cls=EduzzJSONEncoder),
+            partial(responses_module.json_module.dumps, cls=BetterJSONEncoder),
         )
         with RequestsMock() as rm:
             yield rm

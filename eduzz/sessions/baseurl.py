@@ -1,14 +1,14 @@
 from urllib.parse import urljoin
 
-import requests
+from eduzz.sessions.base import BaseSession
 
 
-class BaseUrlSession(requests.Session):
+class BaseUrlSession(BaseSession):
     """Taken from https://github.com/requests/toolbelt/"""
 
-    def __init__(self, base_url=""):
+    def __init__(self, base_url="", **kwargs):
         self.base_url = base_url
-        super(BaseUrlSession, self).__init__()
+        super(BaseUrlSession, self).__init__(**kwargs)
 
     def prepare_request(self, request):
         """Prepare the request after generating the complete URL."""

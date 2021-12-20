@@ -6,6 +6,7 @@ from requests.adapters import HTTPAdapter
 from requests.exceptions import InvalidJSONError
 
 from eduzz.serializers import BetterJSONEncoder, BetterJSONDecoder
+from eduzz.sessions.base import BaseSession
 
 
 class JsonResponse(requests.Response):
@@ -41,19 +42,23 @@ class JsonAdapter(HTTPAdapter):
         return self.response_factory(r)
 
 
-class JsonSession(requests.Session):
+class JsonSession(BaseSession):
     JSON_ENCODER = BetterJSONEncoder
     JSON_DECODER = BetterJSONDecoder
     RESPONSE_CLASS = JsonResponse
 
     def __init__(
-        self, json_encoder=None, json_decoder=None, response_class=None
+        self,
+        json_encoder=None,
+        json_decoder=None,
+        response_class=None,
+        **kwargs
     ):
         self.json_encoder = json_encoder or self.JSON_ENCODER
         self.json_decoder = json_decoder or self.JSON_DECODER
         self.response_class = response_class or self.RESPONSE_CLASS
 
-        super(JsonSession, self).__init__()
+        super(JsonSession, self).__init__(**kwargs)
 
         factory = partial(
             self.response_class.cast, json_decoder=self.json_decoder

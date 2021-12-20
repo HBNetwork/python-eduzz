@@ -1,7 +1,6 @@
 from requests_futures.sessions import FuturesSession
 
-from eduzz.auth import EduzzAuth
-from eduzz.sessions import EduzzSession
+from eduzz.sessions import EduzzAuth, EduzzSession
 
 
 class Eduzz:
