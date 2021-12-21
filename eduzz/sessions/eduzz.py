@@ -25,7 +25,7 @@ class EduzzResponse(JsonResponse):
         super(EduzzResponse, self).raise_for_status()
 
 
-class EduzzSession(JsonSession, BaseUrlSession):
+class EduzzSession(BaseUrlSession, JsonSession):
     """Full featured session to work with high level clients."""
 
     ENDPOINT = "https://api2.eduzz.com"
