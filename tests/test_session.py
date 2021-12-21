@@ -1,7 +1,6 @@
 from datetime import datetime
 
-from eduzz.serializers import serialize
-from eduzz.sessions.eduzz import EduzzSession, EduzzResponse
+from eduzz.sessions import serialize, EduzzSession, EduzzResponse
 
 URL = EduzzSession.ENDPOINT + "/"
 

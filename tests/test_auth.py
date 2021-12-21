@@ -155,7 +155,7 @@ def req():
 def responses(monkeypatch):
     import responses as responses_module
     from functools import partial
-    from eduzz.serializers import BetterJSONEncoder, BetterJSONDecoder
+    from eduzz.sessions.json_session import BetterJSONEncoder, BetterJSONDecoder
 
     with monkeypatch.context() as m:
         m.setattr(

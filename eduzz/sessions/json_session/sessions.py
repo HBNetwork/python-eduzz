@@ -1,45 +1,12 @@
 import json as json_module
-from functools import cache, partial
+from functools import partial
 
-import requests
-from requests.adapters import HTTPAdapter
 from requests.exceptions import InvalidJSONError
 
-from eduzz.serializers import BetterJSONEncoder, BetterJSONDecoder
-from eduzz.sessions.base import BaseSession
-
-
-class JsonResponse(requests.Response):
-    """
-    This class is a proper Response subclass that contemplates the API's design decisions.
-    This could be an adapter, but we would hit __getattr__ everytime.
-    """
-
-    def __init__(self):
-        self.json_decoder = None
-        super(JsonResponse, self).__init__()
-
-    @classmethod
-    def cast(cls, r, json_decoder=None):
-        """Smelly magic to circunvent requests coupling to it's own Response class."""
-        r.__class__ = cls
-        r.json_decoder = json_decoder
-        return r
-
-    @cache
-    def json(self, **kwargs):
-        kwargs.setdefault("cls", self.json_decoder)
-        return super(JsonResponse, self).json(**kwargs)
-
-
-class JsonAdapter(HTTPAdapter):
-    def __init__(self, response_factory, **kwargs):
-        self.response_factory = response_factory
-        super(JsonAdapter, self).__init__(**kwargs)
-
-    def send(self, *args, **kwargs):
-        r = super(JsonAdapter, self).send(*args, **kwargs)
-        return self.response_factory(r)
+from .adapters import JsonAdapter
+from .models import JsonResponse
+from .serializers import BetterJSONEncoder, BetterJSONDecoder
+from .base import BaseSession
 
 
 class JsonSession(BaseSession):

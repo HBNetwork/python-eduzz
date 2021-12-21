@@ -1,8 +1,8 @@
 from requests import HTTPError
 
-from eduzz.sessions import EduzzAuth
-from eduzz.sessions.baseurl import BaseUrlSession
-from eduzz.sessions.customjson import JsonResponse, JsonSession
+from .auth import EduzzAuth
+from .baseurl import BaseUrlSession
+from .json_session import JsonResponse, JsonSession
 
 
 class EduzzAPIError(HTTPError):

@@ -4,8 +4,7 @@ from datetime import datetime
 
 import pytest
 
-from eduzz.serializers import serialize
-from eduzz.sessions.customjson import JsonSession, JsonResponse
+from eduzz.sessions import serialize, JsonSession, JsonResponse
 
 
 def test_session_returns_response_subclass(httpretty):

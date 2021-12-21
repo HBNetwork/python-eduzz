@@ -1,6 +1,6 @@
 from requests_futures.sessions import FuturesSession
 
-from eduzz.sessions import EduzzAuth, EduzzSession
+from eduzz.sessions import EduzzSession
 
 
 class Eduzz:
@@ -9,10 +9,7 @@ class Eduzz:
 
     @classmethod
     def from_credentials(cls, **credentials):
-        auth = EduzzAuth(**credentials)
-        session = EduzzSession()
-        session.auth = auth
-
+        session = EduzzSession.from_credentials(**credentials)
         return cls(session)
 
     def get_sales_list(self, start_date, end_date):
