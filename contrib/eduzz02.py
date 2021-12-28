@@ -2,7 +2,7 @@ from pprint import pprint
 
 from decouple import config
 
-from eduzz import Eduzz
+from eduzz.core import Eduzz
 
 client = Eduzz.from_credentials(
     email=config("EDUZZ_EMAIL"),
@@ -10,7 +10,7 @@ client = Eduzz.from_credentials(
     apikey=config("EDUZZ_APIKEY"),
 )
 
-g = client.get_sales_list2("2021-11-01", "2021-11-30")
+g = client.get_sales_list("2021-11-01", "2021-11-30")
 
 data = list(g)
 
