@@ -1,4 +1,4 @@
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 from eduzz.sessions.base import BaseSession
 
@@ -10,7 +10,17 @@ class BaseUrlSession(BaseSession):
         self.base_url = base_url
         super(BaseUrlSession, self).__init__(**kwargs)
 
+    @staticmethod
+    def is_absolute(url):
+        return bool(urlparse(url).netloc)
+
+    def ensure_absolute_url(self, url):
+        if self.is_absolute(url):
+            return url
+
+        return urljoin(self.base_url, url)
+
     def prepare_request(self, request):
         """Prepare the request after generating the complete URL."""
-        request.url = urljoin(self.base_url, request.url)
+        request.url = self.ensure_absolute_url(request.url)
         return super(BaseUrlSession, self).prepare_request(request)
