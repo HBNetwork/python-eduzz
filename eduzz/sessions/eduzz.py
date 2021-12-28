@@ -3,6 +3,7 @@ from requests import HTTPError
 from .auth import EduzzAuth
 from .baseurl import BaseUrlSession
 from .json_session import JsonResponse, JsonSession
+from .paginator import PaginatedSession
 
 
 class EduzzAPIError(HTTPError):
@@ -25,7 +26,7 @@ class EduzzResponse(JsonResponse):
         super(EduzzResponse, self).raise_for_status()
 
 
-class EduzzSession(BaseUrlSession, JsonSession):
+class EduzzSession(BaseUrlSession, JsonSession, PaginatedSession):
     """Full featured session to work with high level clients."""
 
     ENDPOINT = "https://api2.eduzz.com"
