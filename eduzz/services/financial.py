@@ -1,71 +1,46 @@
 from datetime import date
-from typing import Optional, List, Generator
 
-from eduzz.converters import converter
+from eduzz.magic import autostructure
 from eduzz.models.financial import (
-    PaymentMethod,
-    BankAccount,
     Balance,
-    ValueAvailable,
-    Transfer,
+    BankAccount,
+    PaymentMethod,
     Statement,
+    Transfer,
+    ValueAvailable,
 )
-from eduzz.services.base import Service
+from eduzz.services.base import BaseService
 
 
-class FinancialService(Service):
-    def payment_methods(self, page: Optional[int] = None):
-        path = "/sale/get_sale_list"
-        params = self.params_filtered(self.payment_methods, locals())
+class FinancialService(BaseService):
+    @autostructure
+    def payment_methods(self, page: int | None = None) -> list[PaymentMethod]:
+        yield from self.client.get_all("/sale/get_sale_list", params=self.params())
 
-        for data in self.client.get_all(path, params=params):
-            yield from converter.structure(data, List[PaymentMethod])
+    @autostructure
+    def bank_details(self) -> BankAccount:
+        return self.client.get("/financial/bank_details", params=self.params())
 
-    def bank_details(self):
-        path = "/financial/bank_details"
-        data = self.client.get(path)
-        return converter.structure(data, BankAccount)
+    @autostructure
+    def balance(self) -> Balance:
+        return self.client.get("/financial/balance")
 
-    def balance(self):
-        path = "/financial/balance"
-        data = self.client.get(path)
-        return converter.structure(data, Balance)
+    @autostructure
+    def fund_transfer_methods(self, page: int | None = None) -> list[BankAccount]:
+        yield from self.client.get_all("/financial/fund_transfer_method", params=self.params())
 
-    def fund_transfer_methods(self, page: Optional[int] = None):
-        path = "/financial/fund_transfer_method"
+    @autostructure
+    def value_available(self) -> ValueAvailable:
+        return self.client.get("/financial/value_available")
 
-        params = {}
-        if page:
-            params["page"] = page
-
-        for data in self.client.get_all(path, params=params):
-            yield from converter.structure(data, List[BankAccount])
-
-    def value_available(self):
-        path = "/financial/value_available"
-        data = self.client.get(path)
-        return converter.structure(data, ValueAvailable)
-
-    def transfer_list(self, page: Optional[int] = None):
-        path = "/financial/transfers_list"
-        params = {}
-        if page:
-            params["page"] = page
-
-        for data in self.client.get_all(path, params=params):
-            yield from converter.structure(data, List[Transfer])
+    @autostructure
+    def transfer_list(self, page: int | None = None) -> list[Transfer]:
+        yield from self.client.get_all("/financial/transfers_list", params=self.params())
 
     def can_request_bank_transfer(self):
-        path = "/financial/can_request_bank_transfer"
-        data = self.client.get(path)
+        data = self.client.get("/financial/can_request_bank_transfer")
         return data["permission"]
 
-    def statement(
-        self, start_date: date, end_date: date, page: Optional[int] = None
-    ) -> Generator[Statement]:
-        path = "/financial/statement"
-
-        params = self.params_filtered(self.statement, locals())
-
-        for data in self.client.get_all(path, params=params):
-            yield from converter.structure(data, List[Statement])
+    @autostructure
+    def statement(self, start_date: date, end_date: date, page: int | None = None) -> list[Statement]:
+        yield from self.client.get_all("/financial/statement", params=self.params())
