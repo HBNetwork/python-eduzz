@@ -3,33 +3,26 @@ from functools import partial
 
 from requests.exceptions import InvalidJSONError
 
+from jsonplus import JSONDecoderPlus, JSONEncoderPlus
+
 from .adapters import JsonAdapter
-from .models import JsonResponse
-from .serializers import BetterJSONEncoder, BetterJSONDecoder
 from .base import BaseSession
+from .models import JsonResponse
 
 
 class JsonSession(BaseSession):
-    JSON_ENCODER = BetterJSONEncoder
-    JSON_DECODER = BetterJSONDecoder
+    JSON_ENCODER = JSONEncoderPlus
+    JSON_DECODER = JSONDecoderPlus
     RESPONSE_CLASS = JsonResponse
 
-    def __init__(
-        self,
-        json_encoder=None,
-        json_decoder=None,
-        response_class=None,
-        **kwargs
-    ):
+    def __init__(self, json_encoder=None, json_decoder=None, response_class=None, **kwargs):
         self.json_encoder = json_encoder or self.JSON_ENCODER
         self.json_decoder = json_decoder or self.JSON_DECODER
         self.response_class = response_class or self.RESPONSE_CLASS
 
         super(JsonSession, self).__init__(**kwargs)
 
-        factory = partial(
-            self.response_class.cast, json_decoder=self.json_decoder
-        )
+        factory = partial(self.response_class.cast, json_decoder=self.json_decoder)
         self.mount("https://", JsonAdapter(response_factory=factory))
         self.mount("http://", JsonAdapter(response_factory=factory))
 
@@ -45,9 +38,7 @@ class JsonSession(BaseSession):
 
         # Snippet from requests.PreparedRequest.prepare_body
         try:
-            data = json_module.dumps(
-                request.json, allow_nan=False, cls=self.JSON_ENCODER
-            )
+            data = json_module.dumps(request.json, allow_nan=False, cls=self.JSON_ENCODER)
         except ValueError as ve:
             raise InvalidJSONError(ve, request=self)
 

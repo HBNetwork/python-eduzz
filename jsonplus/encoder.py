@@ -1,29 +1,10 @@
 import datetime
 import decimal
-import json
+import json as stdlib_json
 import uuid
 
 
-class BetterJSONDecoder(json.JSONDecoder):
-    def __init__(self, *args, **kwargs):
-        super().__init__(object_hook=self.hook, *args, **kwargs)
-
-    @staticmethod
-    def hook(source):
-        d = {}
-        for k, v in source.items():
-            if isinstance(v, str) and not v.isdigit():
-                try:
-                    d[k] = datetime.datetime.fromisoformat(v)
-                except (ValueError, TypeError):
-                    d[k] = v
-            else:
-                d[k] = v
-
-        return d
-
-
-class BetterJSONEncoder(json.JSONEncoder):
+class JSONEncoderPlus(stdlib_json.JSONEncoder):
     """
     JSONEncoder subclass that knows how to encode date/time, decimal types, and
     UUIDs.
@@ -56,14 +37,6 @@ class BetterJSONEncoder(json.JSONEncoder):
             return super().default(o)
 
 
-def serialize(obj, cls=BetterJSONEncoder, **kwargs):
-    return json.dumps(obj, cls=cls, **kwargs)
-
-
-def deserialize(obj, cls=BetterJSONDecoder, **kwargs):
-    return json.loads(obj, cls=cls, **kwargs)
-
-
 def _get_duration_components(duration):
     days = duration.days
     seconds = duration.seconds
@@ -85,10 +58,6 @@ def duration_iso_string(duration):
     else:
         sign = ""
 
-    days, hours, minutes, seconds, microseconds = _get_duration_components(
-        duration
-    )
+    days, hours, minutes, seconds, microseconds = _get_duration_components(duration)
     ms = ".{:06d}".format(microseconds) if microseconds else ""
-    return "{}P{}DT{:02d}H{:02d}M{:02d}{}S".format(
-        sign, days, hours, minutes, seconds, ms
-    )
+    return "{}P{}DT{:02d}H{:02d}M{:02d}{}S".format(sign, days, hours, minutes, seconds, ms)
