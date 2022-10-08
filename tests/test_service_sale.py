@@ -3,8 +3,9 @@ from functools import partial
 
 import pytest
 
+import jsonplus as json
 from eduzz.core import Eduzz
-from eduzz.sessions import EduzzSession, json
+from eduzz.sessions import EduzzSession
 
 
 class TestServiceSale:

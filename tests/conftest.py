@@ -22,18 +22,18 @@ def responses(monkeypatch):
 
     import responses as responses_module
 
-    from eduzz.sessions.json_session import BetterJSONDecoder, BetterJSONEncoder
+    from jsonplus import JSONDecoderPlus, JSONEncoderPlus
 
     with monkeypatch.context() as m:
         m.setattr(
             responses_module.json_module,
             "loads",
-            partial(responses_module.json_module.loads, cls=BetterJSONDecoder),
+            partial(responses_module.json_module.loads, cls=JSONDecoderPlus),
         )
         m.setattr(
             responses_module.json_module,
             "dumps",
-            partial(responses_module.json_module.dumps, cls=BetterJSONEncoder),
+            partial(responses_module.json_module.dumps, cls=JSONEncoderPlus),
         )
         with RequestsMock() as rm:
             yield rm

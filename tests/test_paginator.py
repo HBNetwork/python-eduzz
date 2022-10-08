@@ -2,8 +2,8 @@ import re
 
 import pytest
 
-from eduzz.sessions import serialize
-from eduzz.sessions.paginator import Paginator, PaginatedSession
+from eduzz.sessions import dumps
+from eduzz.sessions.paginator import PaginatedSession, Paginator
 
 
 def test_paginator():
@@ -33,7 +33,7 @@ def test_session_returns_all_pages(httpretty, parallel):
         httpretty.GET,
         re.compile(r"/data\?page=1"),
         match_querystring=True,
-        body=serialize(
+        body=dumps(
             {
                 "data": [{"id": 1}, {"id": 2}],
                 "paginator": dict(page=1, size=2, totalPages=2, totalRows=3),
@@ -45,7 +45,7 @@ def test_session_returns_all_pages(httpretty, parallel):
         httpretty.GET,
         re.compile(r"/data\?page=2"),
         match_querystring=True,
-        body=serialize(
+        body=dumps(
             {
                 "data": [{"id": 3}],
                 "paginator": dict(page=2, size=1, totalPages=2, totalRows=3),
@@ -53,9 +53,7 @@ def test_session_returns_all_pages(httpretty, parallel):
         ),
     )
 
-    responses = list(
-        PaginatedSession().get_all("https://h/data", parallel=parallel)
-    )
+    responses = list(PaginatedSession().get_all("https://h/data", parallel=parallel))
     assert responses[0].url == "https://h/data?page=1"
     assert responses[1].url == "https://h/data?page=2"
 

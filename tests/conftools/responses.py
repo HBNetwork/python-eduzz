@@ -15,7 +15,7 @@ class RequestsMock(OriginalRequestsMock):
         return re.compile(host + path)
 
     def add(self, method=None, url=None, *args, **kwargs):
-        if self.is_relative(url):
+        if isinstance(url, str) and self.is_relative(url):
             url = self.regex_for_path(url)
 
         return super().add(method=method, url=url, *args, **kwargs)

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from eduzz.sessions import serialize, EduzzSession, EduzzResponse
+from eduzz.sessions import EduzzResponse, EduzzSession, dumps
 
 URL = EduzzSession.ENDPOINT + "/"
 
@@ -13,9 +13,7 @@ def test_session_returns_response_subclass(httpretty):
 
 
 def test_session_uses_custom_json_decoder(httpretty):
-    httpretty.register_uri(
-        httpretty.GET, URL, serialize({"datetime": datetime(2021, 12, 4)})
-    )
+    httpretty.register_uri(httpretty.GET, URL, dumps({"datetime": datetime(2021, 12, 4)}))
 
     response = EduzzSession().get("/")
     data = response.json()
