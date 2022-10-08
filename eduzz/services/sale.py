@@ -1,4 +1,5 @@
 from datetime import date
+from functools import partial
 from typing import Generator
 
 from eduzz.converters import converter
@@ -13,8 +14,13 @@ from eduzz.models.sale import (
 )
 from eduzz.services.base import BaseService
 
+autostructure = partial(autostructure, converter=converter)
+"Configure autostructure to use our custom converter."
+
 
 class SaleService(BaseService):
+    """Namespace for all sale endpoints."""
+
     def get_sale_list(
         self,
         start_date: date,
@@ -27,13 +33,17 @@ class SaleService(BaseService):
         client_email: str | None = None,
         date_type: SaleDateType | None = None,
         parallel=True,
-    ) -> Generator[Sale]:
+    ) -> Generator[Sale, None, None]:
+        """See https://api2.eduzz.com/#sale-get-sale-list"""
         for data in self.client.get_all("/sale/get_sale_list", params=self.params()):
             yield from converter.structure(data, list[Sale])
 
     @autostructure
     def get_sale(self, sale_id: int) -> Sale:
-        return self.client.get(f"/sale/get_sale/{sale_id}")
+        """See https://api2.eduzz.com/#sale-get-sale"""
+        # We are geting 1 sale, but the endpoints returns it on a list.
+        data, *_ = self.client.get(f"/sale/get_sale/{sale_id}")
+        return data
 
     @autostructure
     def last_days_amount(

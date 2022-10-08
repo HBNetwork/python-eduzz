@@ -20,13 +20,12 @@ class Eduzz:
             yield r.json()["data"]
 
     def request(self, method, path, params):
-        request_method = getattr(self.session, method)
-        r = request_method(path, params=params)
+        r = self.session.request(method, path, params)
         r.raise_for_status()
         return r.json()["data"]
 
-    def get(self, path, params):
-        return self.session.request("GET", path, params=params)
+    def get(self, path, params=None):
+        return self.request("GET", path, params=params)
 
-    def post(self, path, params):
-        return self.session.request("POST", path, params=params)
+    def post(self, path, params=None):
+        return self.request("POST", path, params=params)

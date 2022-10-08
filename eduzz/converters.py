@@ -13,4 +13,4 @@ converter.register_structure_hook(
 )
 
 converter.register_unstructure_hook(Money, lambda m: str(m))
-converter.register_structure_hook(Money, lambda s, _: Money(s))
+converter.register_structure_hook(Money, lambda s, _: Money(0 if s is None else s))
