@@ -4,9 +4,8 @@ from re import compile as regex
 import pytest
 import requests
 from freezegun import freeze_time
-from responses import RequestsMock
 
-from eduzz.sessions import EduzzAuth, EduzzAPIError, EduzzSession
+from eduzz.sessions import EduzzAPIError, EduzzAuth, EduzzSession
 from eduzz.tests import ResponsesSequence
 
 NOW = datetime(2021, 12, 4, 0, 0, 0)
@@ -108,9 +107,7 @@ def test_auth_recover_from_undetected_expired_token(auth, responses):
     responses.add_callback(
         responses.GET,
         "https://h/first",
-        ResponsesSequence(
-            (401, "", error_body("#0029")), (200, "", data_body())
-        ),
+        ResponsesSequence((401, "", error_body("#0029")), (200, "", data_body())),
     )
 
     r = requests.get("https://h/first", auth=auth)
@@ -149,27 +146,6 @@ def auth():
 @pytest.fixture
 def req():
     return requests.PreparedRequest()
-
-
-@pytest.fixture
-def responses(monkeypatch):
-    import responses as responses_module
-    from functools import partial
-    from eduzz.sessions.json_session import BetterJSONEncoder, BetterJSONDecoder
-
-    with monkeypatch.context() as m:
-        m.setattr(
-            responses_module.json_module,
-            "loads",
-            partial(responses_module.json_module.loads, cls=BetterJSONDecoder),
-        )
-        m.setattr(
-            responses_module.json_module,
-            "dumps",
-            partial(responses_module.json_module.dumps, cls=BetterJSONEncoder),
-        )
-        with RequestsMock() as rm:
-            yield rm
 
 
 ERRORS = {
