@@ -4,7 +4,8 @@ from datetime import datetime
 
 import pytest
 
-from eduzz.sessions import JsonResponse, JsonSession, dumps
+import jsonplus
+from requests_customjson import JsonResponse, JsonSession
 
 
 def test_session_returns_response_subclass(httpretty):
@@ -18,7 +19,7 @@ def test_session_uses_custom_json_decoder(httpretty):
     httpretty.register_uri(
         httpretty.GET,
         re.compile(r"/data"),
-        dumps({"datetime": datetime(2021, 12, 4)}),
+        jsonplus.dumps({"datetime": datetime(2021, 12, 4)}),
     )
 
     response = JsonSession().get("https://h/data")
@@ -55,7 +56,7 @@ def test_session_subclass_with_another_decoder(httpretty):
     httpretty.register_uri(
         httpretty.GET,
         re.compile(r"/data"),
-        dumps({"datetime": datetime(2021, 12, 4)}),
+        jsonplus.dumps({"datetime": datetime(2021, 12, 4)}),
     )
 
     response = ReplaceDefaultsSession().get("https://h/data")

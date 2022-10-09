@@ -1,4 +1,4 @@
-from eduzz.sessions import BaseUrlSession
+from requests_customjson import BaseUrlSession
 
 
 def test_baseurl():

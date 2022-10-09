@@ -2,7 +2,7 @@ import re
 
 import pytest
 
-from eduzz.sessions import dumps
+import jsonplus
 from eduzz.sessions.paginator import PaginatedSession, Paginator
 
 
@@ -33,7 +33,7 @@ def test_session_returns_all_pages(httpretty, parallel):
         httpretty.GET,
         re.compile(r"/data\?page=1"),
         match_querystring=True,
-        body=dumps(
+        body=jsonplus.dumps(
             {
                 "data": [{"id": 1}, {"id": 2}],
                 "paginator": dict(page=1, size=2, totalPages=2, totalRows=3),
@@ -45,7 +45,7 @@ def test_session_returns_all_pages(httpretty, parallel):
         httpretty.GET,
         re.compile(r"/data\?page=2"),
         match_querystring=True,
-        body=dumps(
+        body=jsonplus.dumps(
             {
                 "data": [{"id": 3}],
                 "paginator": dict(page=2, size=1, totalPages=2, totalRows=3),
@@ -57,7 +57,7 @@ def test_session_returns_all_pages(httpretty, parallel):
     assert responses[0].url == "https://h/data?page=1"
     assert responses[1].url == "https://h/data?page=2"
 
-    assert list((d for r in responses for d in r.json()["data"])) == [
+    assert [d for r in responses for d in r.json()["data"]] == [
         {"id": 1},
         {"id": 2},
         {"id": 3},
