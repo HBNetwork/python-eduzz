@@ -5,7 +5,7 @@ import pytest
 import requests
 from freezegun import freeze_time
 
-from eduzz.sessions import EduzzAPIError, EduzzAuth, EduzzSession
+from eduzz.session import EduzzAPIError, EduzzAuth, EduzzSession
 from eduzz.tests import ResponsesSequence
 
 NOW = datetime(2021, 12, 4, 0, 0, 0)

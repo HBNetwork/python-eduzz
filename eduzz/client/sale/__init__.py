@@ -2,9 +2,10 @@ from datetime import date
 from functools import partial
 from typing import Generator
 
-from eduzz.converters import converter
-from eduzz.magic import autostructure
-from eduzz.models.sale import (
+from capiboss.base import BaseClient
+from capiboss.converters import converter
+from capiboss.magic import autostructure
+from eduzz.client.sale.model import (
     Days,
     InvoiceItem,
     Sale,
@@ -12,13 +13,12 @@ from eduzz.models.sale import (
     SaleDateType,
     SaleStatus,
 )
-from eduzz.services.base import BaseService
 
 autostructure = partial(autostructure, converter=converter)
 "Configure autostructure to use our custom converter."
 
 
-class SaleService(BaseService):
+class SaleClient(BaseClient):
     """Namespace for all sale endpoints."""
 
     def get_sale_list(

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import jsonplus
-from eduzz.sessions import EduzzResponse, EduzzSession
+from eduzz.session import EduzzResponse, EduzzSession
 
 URL = EduzzSession.ENDPOINT + "/"
 

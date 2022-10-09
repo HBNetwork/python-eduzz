@@ -1,7 +1,8 @@
 from datetime import date
 
-from eduzz.magic import autostructure
-from eduzz.models.financial import (
+from capiboss.base import BaseClient
+from capiboss.magic import autostructure
+from eduzz.client.financial.model import (
     Balance,
     BankAccount,
     PaymentMethod,
@@ -9,10 +10,9 @@ from eduzz.models.financial import (
     Transfer,
     ValueAvailable,
 )
-from eduzz.services.base import BaseService
 
 
-class FinancialService(BaseService):
+class FinancialClient(BaseClient):
     @autostructure
     def payment_methods(self, page: int | None = None) -> list[PaymentMethod]:
         yield from self.client.get_all("/sale/get_sale_list", params=self.params())

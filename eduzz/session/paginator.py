@@ -20,10 +20,7 @@ class Paginator:
 
     def __getitem__(self, item):
         if isinstance(item, slice):
-            return [
-                self._url_for_index(index)
-                for index in range(*item.indices(len(self)))
-            ]
+            return [self._url_for_index(index) for index in range(*item.indices(len(self)))]
         else:
             index = item if item >= 0 else len(self) + item
 
@@ -63,9 +60,7 @@ class PaginatedSession(requests.Session):
         paginator.update(**self.pagination(r))
 
         with FuturesSession(session=self) as session:
-            futures = [
-                session.get(next_url, **kwargs) for next_url in paginator[1:]
-            ]
+            futures = [session.get(next_url, **kwargs) for next_url in paginator[1:]]
 
         first = Future()
         first.set_result(r)

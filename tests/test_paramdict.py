@@ -1,6 +1,6 @@
 from datetime import date
 
-from eduzz.magic import CallersHintedArgs
+from capiboss.magic import CallersHintedArgs
 
 
 class A:

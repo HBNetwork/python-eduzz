@@ -1,13 +1,13 @@
-from eduzz.services.financial import FinancialService
-from eduzz.services.sale import SaleService
-from eduzz.sessions import EduzzSession
+from eduzz.client.financial import FinancialClient
+from eduzz.client.sale import SaleClient
+from eduzz.session import EduzzSession
 
 
-class Eduzz:
+class EduzzClient:
     def __init__(self, session):
         self.session = session
-        self.sale = SaleService(self)
-        self.financial = FinancialService(self)
+        self.sale = SaleClient(self)
+        self.financial = FinancialClient(self)
 
     @classmethod
     def from_credentials(cls, **credentials):

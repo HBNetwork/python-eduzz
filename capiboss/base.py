@@ -1,7 +1,7 @@
-from eduzz.magic import CallersHintedArgs
+from capiboss.magic import CallersHintedArgs
 
 
-class BaseService:
+class BaseClient:
     def __init__(self, client):
         self.client = client
 

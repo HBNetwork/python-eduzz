@@ -4,8 +4,8 @@ from typing import Any, Optional
 
 from attrs import define
 
-from eduzz.converters import converter
-from eduzz.types import Money
+from capiboss.converters import converter
+from money import Money
 
 
 class Days(Enum):

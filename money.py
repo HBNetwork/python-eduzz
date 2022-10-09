@@ -1,4 +1,4 @@
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
 
 class Money(Decimal):
@@ -18,9 +18,7 @@ class Money(Decimal):
         return abs(self.as_tuple().exponent) == precision
 
     def _round(self, decimal_precision=2):
-        number = self.quantize(
-            Decimal(str(1 / 10 ** decimal_precision)), rounding=ROUND_HALF_UP
-        )
+        number = self.quantize(Decimal(str(1 / 10**decimal_precision)), rounding=ROUND_HALF_UP)
         return Money(number, decimal_precision)
 
 

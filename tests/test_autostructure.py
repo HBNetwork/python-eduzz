@@ -3,7 +3,7 @@ from datetime import datetime
 from attr import define
 from cattr import Converter
 
-from eduzz.magic import autostructure
+from capiboss.magic import autostructure
 
 
 def converter_with_datetime():

@@ -4,14 +4,14 @@ from functools import partial
 import pytest
 
 import jsonplus as json
-from eduzz.core import Eduzz
-from eduzz.sessions import EduzzSession
+from eduzz.client import EduzzClient
+from eduzz.session import EduzzSession
 
 
 class TestServiceSale:
     @pytest.fixture
     def eduzz(self):
-        return Eduzz(EduzzSession())
+        return EduzzClient(EduzzSession())
 
     def test_get_sale(self, responses, eduzz):
         responses.add(responses.GET, "/sale/get_sale/1", json=sample_get_sale_200(), status=200)

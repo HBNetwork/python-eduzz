@@ -2,7 +2,7 @@ from datetime import datetime
 
 from cattr import Converter
 
-from eduzz.types import Money
+from money import Money
 
 converter = Converter()
 

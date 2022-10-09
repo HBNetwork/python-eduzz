@@ -3,7 +3,7 @@ import re
 import pytest
 
 import jsonplus
-from eduzz.sessions.paginator import PaginatedSession, Paginator
+from eduzz.session.paginator import PaginatedSession, Paginator
 
 
 def test_paginator():
