@@ -1,3 +1,5 @@
+# Author: Henrique Bastos <henrique@bastos.net>
+# License: MIT
 import datetime
 import json as stdlib_json
 
